@@ -1,0 +1,108 @@
+services:
+  # API
+  lf-api:
+    image: ntnp/laravel-dev:8.3
+    container_name: lf-api
+    hostname: lf-api
+    depends_on:
+      - lf-mysql
+      - lf-redis
+    networks:
+      - app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./lf-api:/var/www/html
+
+  # API Horizon/Scheduler
+  lf-api-horizon:
+    image: ntnp/laravel-horizon-dev:8.3
+    container_name: lf-api-horizon
+    hostname: lf-api-horizon
+    depends_on:
+      - lf-mysql
+      - lf-redis
+    networks:
+      - app
+    volumes:
+      - ./lf-api:/var/www/html
+
+  # API Reverb
+  #lf-api-reverb:
+  #  image: ntnp/laravel-reverb-dev:8.3
+  #  container_name: lf-api-reverb
+  #  hostname: lf-api-reverb
+  #  depends_on:
+  #    - lf-mysql
+  #    - lf-redis
+  #  networks:
+  #    - app
+  #  volumes:
+  #    - ./lf-api:/var/www/html
+
+  # API web
+  lf-api-web:
+    image: nginx:latest
+    container_name: lf-api-web
+    hostname: lf-api-web
+    depends_on:
+      - lf-api
+    links:
+      - lf-api
+    networks:
+      - app
+    ports:
+      - "8050:80"
+      - "8051:443"
+    volumes:
+      - ./lf-api:/var/www/html
+      - ./.docker/nginx/ssl:/etc/nginx/ssl
+      - ./.docker/nginx/api-web.conf:/etc/nginx/conf.d/default.conf
+
+  # API Reverb web
+  #lf-api-reverb-web:
+  #  image: nginx:latest
+  #  container_name: lf-api-reverb-web
+  #  hostname: lf-api-reverb-web
+  #  depends_on:
+  #    - lf-api-reverb
+  #  links:
+  #    - lf-api-reverb
+  #  networks:
+  #    - app
+  #  ports:
+  #    - "9050:80"
+  #    - "9051:443"
+  #  volumes:
+  #    - ./lf-api:/var/www/html
+  #    - ./.docker/nginx/ssl:/etc/nginx/ssl
+  #    - ./.docker/nginx/api-reverb-web.conf:/etc/nginx/conf.d/default.conf
+
+  # MySQL
+  lf-mysql:
+    image: mariadb:latest
+    container_name: lf-mysql
+    hostname: lf-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 20240101
+    networks:
+      - app
+    ports:
+      - "3350:3306"
+    volumes:
+      - ./.docker_data/mysql:/var/lib/mysql
+
+  # Redis
+  lf-redis:
+    image: redis:alpine
+    container_name: lf-redis
+    hostname: lf-redis
+    command: "redis-server --requirepass 20240101"
+    networks:
+      - app
+    ports:
+      - "6350:6379"
+
+networks:
+  app:
+    driver: bridge
