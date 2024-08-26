@@ -47,8 +47,6 @@ services:
     hostname: lf-api-web
     depends_on:
       - lf-api
-    links:
-      - lf-api
     networks:
       - app
     ports:
@@ -65,8 +63,6 @@ services:
   #  container_name: lf-api-reverb-web
   #  hostname: lf-api-reverb-web
   #  depends_on:
-  #    - lf-api-reverb
-  #  links:
   #    - lf-api-reverb
   #  networks:
   #    - app
